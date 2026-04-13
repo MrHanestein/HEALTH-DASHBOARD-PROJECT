@@ -3,17 +3,30 @@ from fastapi import FastAPI, HTTPException
 #Pydantic is used for data validation
 from pydantic import BaseModel
 
+description = """
+Health-Dashboard API is a simple service, to request patients records and create new patient record.
+
+##HTTP REQUESTS
+You can use a POST and GET meaning you can 
+**Create new patient record**
+**Read each patient record by ID**
+"""
 #Create the HTTP connection point
-app = FastAPI()
+app = FastAPI(
+    title ="Health-Dashboard API",
+    Summary="API for managing patient health records",
+    version = "0.1.0",
+    contact={"name":"David Anthony"},
+)
 
 #Use the BaseModel and define the patient blueprint
 class PatientInfo(BaseModel):
     name: str
     age: int
     sex: str
-    nhs_number: int
+    nhs_number: str
     email_address: str
-    Condition: str
+    condition: str
 
 #For a quick demonstration - Patients database (create an id field with "id")
 # Using keys as strings and values as their type in a dictionary, you can nest {} inside:   {1 :{}} or {1 : ..}
@@ -27,13 +40,13 @@ patients_db = {
 next_id = 3
 
 #Create getter method
-app.get("/api/patients")
+@app.get("/api/patients")
 def my_list_patients():
     # Use a doc string with """ """ and put what it does. Also use the list() method and .values() top connect with patients_db for the dictionary.
     """Retrieve all patients"""
     return list(patients_db.values())
 
-app.get("/api/patients/{patient_id}")
+@app.get("/api/patients/{patient_id}")
 def get_patient(patient_id: int):
     """Retrieve a single patient"""
     # If coondition to check if a patient does not exist inside the database to throw exception
@@ -45,7 +58,7 @@ def get_patient(patient_id: int):
 
 
 # Call pydantic method name defined to use
-@app.post("/api/patients", status_code = 404)
+@app.post("/api/patients", status_code = 201)
 def create_patient(patient: PatientInfo):
 # Use global for the next_id to make it persist throughout code
     global next_id
@@ -57,6 +70,8 @@ def create_patient(patient: PatientInfo):
     # return new patient
     return new_patient
 
-
+@app.get("/")
+def get_root_address():
+    return {"message":"Welcome to the Patient and Health Dashboard API"}
 
 
